@@ -2,20 +2,53 @@ name: Update CDC YAML
 
 on:
   workflow_dispatch:  # Allows manual trigger from GitHub UI
+    inputs:
+      BASE_TABLE:
+        description: 'Base table name'
+        required: true
+        default: ''
+      LOAD_FREQUENCY:
+        description: 'Load frequency (e.g., @daily, @hourly)'
+        required: true
+        default: '@daily'
+      IS_PARTITIONED:
+        description: 'Is table partitioned? (yes/no)'
+        required: true
+        default: 'yes'
+      PARTITION_COLUMN:
+        description: 'Partition column'
+        required: true
+        default: 'recordstamp'
+      PARTITION_TYPE:
+        description: 'Partition type (e.g., time, hash)'
+        required: true
+        default: 'time'
+      TIME_GRAIN:
+        description: 'Time grain (e.g., day, hour)'
+        required: true
+        default: 'day'
+      ADD_CLUSTER:
+        description: 'Add cluster? (yes/no)'
+        required: true
+        default: 'yes'
+      CLUSTER_COLUMNS:
+        description: 'Cluster columns (comma-separated)'
+        required: true
+        default: ''
 
 jobs:
   update-cdc:
     runs-on: ubuntu-latest
 
     env:
-      BASE_TABLE: hardcoded_my_table
-      LOAD_FREQUENCY: "@daily"
-      IS_PARTITIONED: "yes"
-      PARTITION_COLUMN: "recordstamp"
-      PARTITION_TYPE: "time"
-      TIME_GRAIN: "day"
-      ADD_CLUSTER: "yes"
-      CLUSTER_COLUMNS: "rldnr,bttype,vrgng"
+      BASE_TABLE: ${{ github.event.inputs.BASE_TABLE }}
+      LOAD_FREQUENCY: ${{ github.event.inputs.LOAD_FREQUENCY }}
+      IS_PARTITIONED: ${{ github.event.inputs.IS_PARTITIONED }}
+      PARTITION_COLUMN: ${{ github.event.inputs.PARTITION_COLUMN }}
+      PARTITION_TYPE: ${{ github.event.inputs.PARTITION_TYPE }}
+      TIME_GRAIN: ${{ github.event.inputs.TIME_GRAIN }}
+      ADD_CLUSTER: ${{ github.event.inputs.ADD_CLUSTER }}
+      CLUSTER_COLUMNS: ${{ github.event.inputs.CLUSTER_COLUMNS }}
 
     steps:
       - name: Checkout repository
@@ -32,20 +65,19 @@ jobs:
       - name: Run CDC updater script
         run: python updateCDC.py 
 
-
       - name: Upload updated YAML as artifact
         uses: actions/upload-artifact@v4
         with:
           name: updated-cdc-settings
           path: updated_settingsYML/
 
-      #- name: Commit updated YAML
-      #  env:
-      #    GH_TOKEN: ${{ secrets.GH_PAT }}
-
-      #  run: |
-      #    git config user.name "adnapstergit"
-      #    git config user.email "ad.stack69@gmail.com"
-      #    git add updated_settingsYML/
-      #    git diff --cached --quiet || git commit -m "🔄 Update CDC settings for $BASE_TABLE"
-      #    git push
+      # Uncomment below if you want to auto-commit the changes
+      # - name: Commit updated YAML
+      #   env:
+      #     GH_TOKEN: ${{ secrets.GH_PAT }}
+      #   run: |
+      #     git config user.name "adnapstergit"
+      #     git config user.email "ad.stack69@gmail.com"
+      #     git add updated_settingsYML/
+      #     git diff --cached --quiet || git commit -m "🔄 Update CDC settings for $BASE_TABLE"
+      #     git push
