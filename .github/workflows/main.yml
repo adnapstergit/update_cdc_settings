@@ -1,0 +1,27 @@
+name: Update CDC YAML
+
+on:
+  workflow_dispatch:
+
+jobs:
+  update-cdc:
+    runs-on: ubuntu-latest
+    env:
+      BASE_TABLE: my_table
+      LOAD_FREQUENCY: "@daily"
+      IS_PARTITIONED: "yes"
+      PARTITION_COLUMN: "recordstamp"
+      PARTITION_TYPE: "time"
+      TIME_GRAIN: "day"
+      ADD_CLUSTER: "yes"
+      CLUSTER_COLUMNS: "rldnr,bttype,vrgng"
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+      - name: Install dependencies
+        run: pip install requests
+      - name: Run CDC updater
+        run: python updateCDC.py
