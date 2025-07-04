@@ -130,7 +130,8 @@ if __name__ == "__main__":
     updated_lines, was_updated = update_yaml(yaml_lines, base_table, load_frequency, partition_details, cluster_details)
 
     if was_updated:
-        output_path = f"updated_settingsYML/{base_table}_cdc_settings.yaml"
+        ###output_path = f"updated_settingsYML/{base_table}_cdc_settings.yaml"
+        output_path = f"updated_settingsYML/cdc_settings.yaml"
         if validate_yaml(updated_lines):
             write_yaml_lines(output_path, updated_lines)
             print(f"✅ YAML file updated and saved to: {output_path}")
