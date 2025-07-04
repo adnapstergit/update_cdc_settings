@@ -32,13 +32,20 @@ jobs:
       - name: Run CDC updater script
         run: python updateCDC.py 
 
-      - name: Commit updated YAML
-        env:
-          GH_TOKEN: ${{ secrets.GH_PAT }}
 
-        run: |
-          git config user.name "adnapstergit"
-          git config user.email "ad.stack69@gmail.com"
-          git add updated_settingsYML/
-          git diff --cached --quiet || git commit -m "🔄 Update CDC settings for $BASE_TABLE"
-          git push
+      - name: Upload updated YAML as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: updated-cdc-settings
+          path: updated_settingsYML/
+
+      #- name: Commit updated YAML
+      #  env:
+      #    GH_TOKEN: ${{ secrets.GH_PAT }}
+
+      #  run: |
+      #    git config user.name "adnapstergit"
+      #    git config user.email "ad.stack69@gmail.com"
+      #    git add updated_settingsYML/
+      #    git diff --cached --quiet || git commit -m "🔄 Update CDC settings for $BASE_TABLE"
+      #    git push
