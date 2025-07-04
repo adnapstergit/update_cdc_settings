@@ -62,8 +62,8 @@ jobs:
       - name: Install dependencies
         run: pip install requests
 
-      - name: Install yaml
-        run: pip install yaml 
+      - name: Install PyYAML
+        run: pip install pyyaml
 
       - name: Run CDC updater script
         run: python updateCDC.py 
