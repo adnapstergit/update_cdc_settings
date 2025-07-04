@@ -33,6 +33,9 @@ jobs:
         run: python updateCDC.py 
 
       - name: Commit updated YAML
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+
         run: |
           git config user.name "adnapstergit"
           git config user.email "ad.stack69@gmail.com"
