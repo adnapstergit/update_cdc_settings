@@ -30,7 +30,7 @@ jobs:
         run: pip install requests
 
       - name: Run CDC updater script
-        run: python your_script.py  # Replace with your actual script filename
+        run: python updateCDC.py 
 
       - name: Commit updated YAML
         run: |
