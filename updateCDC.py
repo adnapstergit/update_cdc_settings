@@ -8,6 +8,7 @@ def load_yaml_lines_from_github(raw_url):
     return response.text.splitlines(keepends=True)
 
 def write_yaml_lines(file_path, lines):
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
     with open(file_path, 'w') as f:
         f.writelines(lines)
 
@@ -100,7 +101,6 @@ if __name__ == "__main__":
 
     # Replace with your actual raw GitHub URL
     github_raw_url = "https://raw.githubusercontent.com/adnapstergit/update_cdc_settings/main/cdc_settings.yaml"
-    local_output_file = "updated_cdc_settings.yaml"
 
     try:
         yaml_lines = load_yaml_lines_from_github(github_raw_url)
@@ -112,7 +112,8 @@ if __name__ == "__main__":
     updated_lines, was_updated = update_yaml(yaml_lines, base_table, load_frequency, partition_details, cluster_details)
 
     if was_updated:
-        write_yaml_lines(local_output_file, updated_lines)
-        print(f"✅ YAML file updated and saved to: {local_output_file}")
+        output_path = f"updated_settingsYML/{base_table}_cdc_settings.yaml"
+        write_yaml_lines(output_path, updated_lines)
+        print(f"✅ YAML file updated and saved to: {output_path}")
     else:
         print(f"⚠️ No changes made to the YAML file.")
