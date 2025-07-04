@@ -1,6 +1,7 @@
 import os
 import re
 import requests
+import yaml 
 
 def load_yaml_lines_from_github(raw_url):
     response = requests.get(raw_url)
@@ -35,11 +36,15 @@ def format_entry(indent, base_table, load_frequency, partition_details, cluster_
     lines = [f"{indent}- base_table: {base_table}\n"]
     lines.append(f"{indent}  load_frequency: \"{load_frequency}\"\n")
     if partition_details:
-        lines.append(f"{indent}  partition_details: {{\n")
-        lines.append(f"{indent}    column: \"{partition_details['column']}\", partition_type: \"{partition_details['partition_type']}\", time_grain: \"{partition_details['time_grain']}\"\n")
-        lines.append(f"{indent}  }}\n")
+        lines.append(f"{indent}  partition_details:\n")
+        lines.append(f"{indent}    column: \"{partition_details['column']}\"\n")
+        lines.append(f"{indent}    partition_type: \"{partition_details['partition_type']}\"\n")
+        lines.append(f"{indent}    time_grain: \"{partition_details['time_grain']}\"\n")
     if cluster_details:
-        lines.append(f"{indent}  cluster_details: {{columns: {cluster_details['columns']}}}\n")
+        lines.append(f"{indent}  cluster_details:\n")
+        lines.append(f"{indent}    columns:\n")
+        for col in cluster_details['columns']:
+            lines.append(f"{indent}      - {col}\n")
     return lines
 
 def update_yaml(lines, base_table, load_frequency, partition_details, cluster_details):
@@ -73,11 +78,11 @@ def update_yaml(lines, base_table, load_frequency, partition_details, cluster_de
         match = re.match(r'^\s*#?\s*- base_table:\s*' + re.escape(base_table) + r'\s*$', line)
         if match:
             table_found = True
-            new_lines.append(line)
+            # Skip old entry
             i += 1
             while i < len(lines) and re.match(r'^\s{2,}\S', lines[i]):
                 i += 1
-            new_lines = new_lines[:-1]
+            # Replace with new entry
             new_lines.extend(format_entry(indent, base_table, load_frequency, partition_details, cluster_details))
             updated = True
             continue
@@ -96,11 +101,20 @@ def update_yaml(lines, base_table, load_frequency, partition_details, cluster_de
 
     return new_lines, updated
 
+def validate_yaml(lines):
+    try:
+        yaml.safe_load("".join(lines))
+        return True
+    except yaml.YAMLError as e:
+        print(f"❌ YAML validation error: {e}")
+        return False
+
 if __name__ == "__main__":
     print("🚀 Starting CDC YAML updater...")
 
-    # Replace with your actual raw GitHub URL
-    github_raw_url = "https://raw.githubusercontent.com/adnapstergit/update_cdc_settings/main/cdc_settings.yaml"
+   
+    github_raw_url = "https://raw.githubusercontent.com/adnapstergit/update_cdc_settings/refs/heads/main/cdc_settings.yaml"
+    
 
     try:
         yaml_lines = load_yaml_lines_from_github(github_raw_url)
@@ -113,7 +127,10 @@ if __name__ == "__main__":
 
     if was_updated:
         output_path = f"updated_settingsYML/{base_table}_cdc_settings.yaml"
-        write_yaml_lines(output_path, updated_lines)
-        print(f"✅ YAML file updated and saved to: {output_path}")
+        if validate_yaml(updated_lines):
+            write_yaml_lines(output_path, updated_lines)
+            print(f"✅ YAML file updated and saved to: {output_path}")
+        else:
+            print("❌ YAML output is invalid. File not saved.")
     else:
         print(f"⚠️ No changes made to the YAML file.")
