@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      BASE_TABLE: my_table
+      BASE_TABLE: hardcoded_my_table
       LOAD_FREQUENCY: "@daily"
       IS_PARTITIONED: "yes"
       PARTITION_COLUMN: "recordstamp"
