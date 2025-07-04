@@ -102,12 +102,17 @@ def update_yaml(lines, base_table, load_frequency, partition_details, cluster_de
     return new_lines, updated
 
 def validate_yaml(lines):
+    joined = "".join(lines)
+    if "{%" in joined or "{{" in joined:
+        print("⚠️ Skipping YAML validation due to Jinja templating.")
+        return True
     try:
-        yaml.safe_load("".join(lines))
+        yaml.safe_load(joined)
         return True
     except yaml.YAMLError as e:
         print(f"❌ YAML validation error: {e}")
         return False
+
 
 if __name__ == "__main__":
     print("🚀 Starting CDC YAML updater...")
