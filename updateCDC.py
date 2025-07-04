@@ -44,7 +44,7 @@ def format_entry(indent, base_table, load_frequency, partition_details, cluster_
         lines.append(f"{indent}  cluster_details:\n")
         lines.append(f"{indent}    columns:\n")
         for col in cluster_details['columns']:
-            lines.append(f"{indent}      - {col}\n")
+            lines.append(f"{indent}      - \"{col}\"\n")
     return lines
 
 def update_yaml(lines, base_table, load_frequency, partition_details, cluster_details):
