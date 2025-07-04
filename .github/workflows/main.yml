@@ -1,11 +1,12 @@
 name: Update CDC YAML
 
 on:
-  workflow_dispatch:
+  workflow_dispatch:  # Allows manual trigger from GitHub UI
 
 jobs:
   update-cdc:
     runs-on: ubuntu-latest
+
     env:
       BASE_TABLE: my_table
       LOAD_FREQUENCY: "@daily"
@@ -15,13 +16,26 @@ jobs:
       TIME_GRAIN: "day"
       ADD_CLUSTER: "yes"
       CLUSTER_COLUMNS: "rldnr,bttype,vrgng"
+
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.x'
+
       - name: Install dependencies
         run: pip install requests
-      - name: Run CDC updater
-        run: python updateCDC.py
+
+      - name: Run CDC updater script
+        run: python your_script.py  # Replace with your actual script filename
+
+      - name: Commit updated YAML
+        run: |
+          git config user.name "adnapstergit"
+          git config user.email "ad.stack69@gmail.com"
+          git add updated_settingsYML/
+          git diff --cached --quiet || git commit -m "🔄 Update CDC settings for $BASE_TABLE"
+          git push
